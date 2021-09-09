@@ -1,0 +1,74 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+  annotations:
+    kubernetes-engine.cloud.google.com/icon: >-
+      data:image/png;base64,{{ .Files.Get "logo.png" | b64enc }}
+    marketplace.cloud.google.com/deploy-info: '{"partner_id": "click-to-deploy-containers", "product_id": "yugabyte-platform", "partner_name": "Google Click to Deploy"}'
+spec:
+  descriptor:
+    type: YBPlatform
+    version: "{{ .Values.image.tag }}"
+    description: |-
+      Yugabyte Platform makes it easy to deploy and upgrade YugabyteDB.
+      Use Yugabyte Platform's orchestration and monitoring to manage YugabyteDB universes. 
+      Yugabyte Platform can create a YugabyteDB universe with many instances (VMs, pods, machines, etc., provided by IaaS), logically grouped together to form one logical distributed database.
+      Each universe includes one or more clusters. A universe is comprised of one primary cluster and, optionally, one or more read replica clusters.
+      All instances belonging to a cluster run on the same type of cloud provider instance type.
+      
+      ### Yugabyte Platform Features
+      * **YugabyteDB-as-a-Service on Kubernetes** - Deploy your own YugabyteDB-as-a-Service running on any Kubernetes infrastructure, Yugabyte Platform provides central management for multiple database clusters and Includes 24/7 production support.  
+      * **Monitoring & Alerting** - Comprehensive monitoring & alerting without any configuration.  
+      * **Scheduled Backups** - Use Yugabyte Platform to perform a regular scheduled backup of a full YugabyteDB universe or selected tables.
+
+      ### Getting Started
+      Here are a few resources for getting started with Yugabyte platform
+      * [Quick start guide for Yugabyte Platform](https://docs.yugabyte.com/latest/yugabyte-platform/deploy/) - Install Yugabyte platform.
+      * [Quick Start for YugabyteDB](http://docs.yugabyte.com/latest/quick-start/) - install, create a local cluster and read/write from YugaByte DB.  
+      * [Explore core features](https://docs.yugabyte.com/latest/explore/) - automatic sharding & re-balancing, linear scalability, fault tolerance, tunable reads etc.  
+      * [Ecosystem integrations](https://docs.yugabyte.com/latest/develop/ecosystem-integrations/) - integrations with Apache Kafka/KSQL, Apache Spark, JanusGraph, KairosDB, Presto and more.  
+      * [Real world apps](https://docs.yugabyte.com/latest/develop/realworld-apps/) - sample real-world, end-to-end applications built using YugaByte DB.  
+
+      ### Help
+      Cannot find what you are looking for? Have a question? We love to hear from you - [please file a GitHub issue](https://github.com/YugaByte/yugabyte-db/issues) or talk to us live at [Slack](https://www.yugabyte.com/slack).
+    notes: |-
+      # TO DO 
+    maintainers:
+      - name: YugaByte
+        url: http://www.yugabyte.com/
+    keywords:
+      - database
+      - SQL
+      - yugabyte
+    links:
+      - description: 'Yugabyte Platform'
+        url: http://www.yugabyte.com/README.md
+  info:
+    - name: YB SQL IP Address
+      type: Reference
+      valueFrom:
+        serviceRef:
+          name: "{{ .Release.Name }}-yb-svc"
+    - name: Application namespace
+      value: "{{ .Release.Namespace }}"
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ .Release.Name }}"
+  addOwnerRef: true
+  componentKinds:
+  - group: 'v1'
+    kind: PersistentVolumeClaim
+  - group: ''
+    kind: Secret
+  - group: ''
+    kind: Service
+  - group: ''
+    kind: StatefulSet
+  - group: 'v1beta1'
+    kind: PodDisruptionBudget
+  - group: ''
+    kind: ConfigMap

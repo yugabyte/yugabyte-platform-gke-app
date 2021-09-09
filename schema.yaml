@@ -1,0 +1,61 @@
+x-google-marketplace:
+  schemaVersion: v2
+
+  applicationApiVersion: v1beta1
+  publishedVersion: '0.1.1-20210916'
+  publishedVersionMetadata:
+    releaseNote: >-
+      A first release.
+
+  images:
+    '':
+      properties:
+        image.repository:
+          type: REPO_WITH_REGISTRY
+        image.tag:
+          type: TAG
+    postgres:
+      properties:
+        image.postgres.registry:
+          type: REGISTRY
+        image.postgres.name:
+          type: REPO_WITHOUT_REGISTRY
+        image.postgres.tag:
+          type: TAG
+    prometheus:
+      properties:
+        image.prometheus.registry:
+          type: REGISTRY
+        image.prometheus.name:
+          type: REPO_WITHOUT_REGISTRY
+        image.prometheus.tag:
+          type: TAG
+    nginx:
+      properties:
+        image.nginx.registry:
+          type: REGISTRY
+        image.nginx.name:
+          type: REPO_WITHOUT_REGISTRY
+        image.nginx.tag:
+          type: TAG
+
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+  yugaware.storage:
+    type: string
+    title: Storage size for persistent volumes
+    default: "5Gi"
+    description: Yugabyte Platform storage size
+    pattern: '^[1-9][0-9]*(\.[0-9]+)?[TGM]i?$'
+  
+
+required:
+- name
+- namespace
