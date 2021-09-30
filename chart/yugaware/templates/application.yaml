@@ -52,7 +52,7 @@ spec:
       type: Reference
       valueFrom:
         serviceRef:
-          name: "{{ .Release.Name }}-yb-svc"
+          name: "{{ .Release.Name }}-yugaware-ui"
     - name: Application namespace
       value: "{{ .Release.Namespace }}"
   selector:

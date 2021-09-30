@@ -26,7 +26,11 @@ spec:
       labels:
         app: {{ .Release.Name }}-yugaware
     spec:
+      {{- if .Values.yugaware.serviceAccount }}
+      serviceAccountName: {{ .Values.yugaware.serviceAccount }}
+      {{ else }}
       serviceAccountName: {{ .Release.Name }}
+      {{- end }}
       imagePullSecrets:
       - name: {{ .Values.image.pullSecret }}
       {{- if .Values.securityContext.enabled }}

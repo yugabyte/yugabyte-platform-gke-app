@@ -2,7 +2,7 @@ x-google-marketplace:
   schemaVersion: v2
 
   applicationApiVersion: v1beta1
-  publishedVersion: '0.1.1-20210916'
+  publishedVersion: '0.1.5-20210927'
   publishedVersionMetadata:
     releaseNote: >-
       A first release.
@@ -51,11 +51,55 @@ properties:
   yugaware.storage:
     type: string
     title: Storage size for persistent volumes
-    default: "5Gi"
+    default: '5Gi'
     description: Yugabyte Platform storage size
     pattern: '^[1-9][0-9]*(\.[0-9]+)?[TGM]i?$'
-  
+  yugaware.serviceAccount:
+    type: string
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        description: >
+            Service Account for YugaByte Platform
+        roles:
+        - type: ClusterRole
+          rulesType: CUSTOM
+          rules:
+          - apiGroups: ['']
+            resources: ['namespaces']
+            verbs: ['delete', 'create']
+          - apiGroups: ['']
+            resources: ['pods']
+            verbs: ['get', 'list']
+          - apiGroups: ['']
+            resources: ['services']
+            verbs: ['get', 'list']
+          - apiGroups: ['']
+            resources: ['persistentvolumeclaims']
+            verbs: ['list', 'delete']
+          - apiGroups: ['']
+            resources: ['pods/exec']
+            verbs: ['create']
+          - apiGroups: ['apps']
+            resources: ['statefulsets/scale']
+            verbs: ['patch']
+        - type: ClusterRole
+          rulesType: CUSTOM
+          rules:
+          - apiGroups: ['policy']
+            resources: ['poddisruptionbudgets']
+            verbs: ['get', 'create', 'delete', 'patch']
+          - apiGroups: ['']
+            resources: ['services']
+            verbs: ['get', 'delete', 'create', 'patch']
+          - apiGroups: ['apps']
+            resources: ['statefulsets']
+            verbs: ['get', 'delete', 'create', 'patch']
+          - apiGroups: ['']
+            resources: ['secrets']
+            verbs: ['create', 'list', 'get', 'delete', 'update', 'patch']
 
 required:
 - name
 - namespace
+- yugaware.serviceAccount

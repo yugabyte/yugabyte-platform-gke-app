@@ -41,7 +41,7 @@ yugaware:
   storageClass: standard
   storageAnnotations: {}
   multiTenant: false
-  serviceAccount: yugaware
+  serviceAccount: ''
   serviceMonitor:
     enabled: false
     annotations: {}
@@ -120,7 +120,7 @@ rbac:
   ## ClusterRole and Binding, for example an OpenShift cluster. When
   ## set to false, some of the graphs from Container section of the
   ## Metrics UI don't work.
-  create: true
+  create: false
 
 ## In order to deploy on OpenShift Container Platform, set this to
 ## true.
