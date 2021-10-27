@@ -1,3 +1,4 @@
+{{ if .Values.rbac.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -10,7 +11,6 @@ metadata:
   annotations:
 {{ toYaml .Values.yugaware.serviceAccountAnnotations | indent 4 }}
 {{- end }}
-{{- if .Values.rbac.create }}
 {{- if .Values.ocpCompatibility.enabled }}
 ---
 kind: ClusterRoleBinding
@@ -84,4 +84,4 @@ roleRef:
   name: {{ .Release.Name }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
-{{- end }}
+{{ end }}
