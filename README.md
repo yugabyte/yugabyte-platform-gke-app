@@ -71,7 +71,7 @@ gcloud container clusters get-credentials "$CLUSTER" --zone "$ZONE"
 Clone this repo and the associated tools repo.
 
 ```shell
-git clone --recursive https://github.com/GoogleCloudPlatform/click-to-deploy.git
+git clone https://github.com/yugabyte/yugabyte-platform-gke-app.git
 ```
 
 #### Install the Application resource definition
@@ -98,7 +98,7 @@ community. The source code can be found on
 Navigate to the `yugabyte-platform-gke-app` directory.
 
 ```shell
-cd click-to-deploy/k8s/yugabyte-platform
+cd yugabyte-platform-gke-app
 ```
 
 #### Configure the app with environment variables
@@ -113,8 +113,8 @@ export NAMESPACE=test-ns
 Configure the container images.
 
 ```shell
-export TAG=0.1.6-20211025
-export IMAGE_YUGABYTE_PLATFORM_REPO="gcr.io/yugabyte-pcf/yugabyte-platform"
+export TAG=<TAG>
+export IMAGE_YUGABYTE_PLATFORM_REPO="marketplace.gcr.io/google/yugabyte-platform"
 ```
 
 #### Create namespace in your Kubernetes cluster
@@ -136,13 +136,16 @@ Use `helm template` to expand the template. We recommend that you save the
 expanded manifest file for future updates to the application.
 
 ```shell
-helm template "${APP_INSTANCE_NAME}" chart/yugaware 
+helm template "${APP_INSTANCE_NAME}" chart/yugaware \
   --namespace "${NAMESPACE}" \
-  --set image.commonRegistry="${IMAGE_YUGABYTE_PLATFORM_REPO}" \
+  --set image.repository="${IMAGE_YUGABYTE_PLATFORM_REPO}" \
   --set image.tag="${TAG}" \
+  --set image.postgres.registry="${IMAGE_YUGABYTE_PLATFORM_REPO}" \
   --set image.postgres.tag="${TAG}" \
+  --set image.prometheus.registry="${IMAGE_YUGABYTE_PLATFORM_REPO}" \
   --set image.prometheus.name="prometheus" \
-  --set image.prometheus-tag="${TAG}" \
+  --set image.prometheus.tag="${TAG}" \
+  --set image.nginx.registry="${IMAGE_YUGABYTE_PLATFORM_REPO}" \
   --set image.nginx.name="nginx" \
   --set image.nginx.tag="${TAG}" \
   --set yugaware.serviceAccount="${SERVICE_ACCOUNT}" \
@@ -153,7 +156,7 @@ helm template "${APP_INSTANCE_NAME}" chart/yugaware
 Use kubectl to apply the manifest to your Kubernetes cluster. This installation creates:
 
 - An Application resource, which collects all the deployment resources into one logical entity.
-- A PersistentVolume and PersistentVolumeClaim. If an installation is deleted, the volume is not deleted with it. If you delete an installation, then recreate it with the same name, the new installation will use the same PersistentVolume. As a result, there will be no app initialization, and the old configuration will be used.
+- A PersistentVolume and PersistentVolumeClaim.
 - A StatefulSet.
 - A Services, which expose Yugabyte Platform UI on 80 for non-TLS and 443 for TLS).
 
@@ -171,23 +174,24 @@ echo "https://console.cloud.google.com/kubernetes/application/${ZONE}/${CLUSTER}
 
 To view your app, open the URL in your browser.
 
-# Access the Yugabyte Platform UI
+# Backup and Restore
+
+Follow the [link](https://docs.yugabyte.com/latest/yugabyte-platform/administer-yugabyte-platform/back-up-restore-k8s/) to know more about it. 
+
+# Basic Usage
+
+## Access the Yugabyte Platform UI
 
 Get the external endpoint from application page in the Google Cloud Console.
-
-# Application metrics
-
-# Scaling
-
-# Backup and restore
-
-## Restore the database
-
-# Upgrading the app
+Follow the [link](https://docs.yugabyte.com/latest/yugabyte-platform/configure-yugabyte-platform/) to know more about it.
 
 # Uninstalling the Application
 
 ## Using the Google Cloud Platform Console
+
+1. In the Cloud Console, open Kubernetes Applications.
+2. From the list of apps, choose your app installation.
+3. On the Application Details page, click Delete.
 
 ## Using the command line
 
