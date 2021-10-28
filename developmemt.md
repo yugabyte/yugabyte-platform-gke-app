@@ -56,6 +56,5 @@ We have used following images from GCR on the place of Dockerhub and Quay images
 postgres:11.5 -> gcr.io/cloud-marketplace/google/postgresql11:11.7
 prom/prometheus:v2.27.1 -> gcr.io/cloud-marketplace/google/prometheus2:2.18
 nginxinc/nginx-unprivileged:1.17.4-amd64 -> gcr.io/cloud-marketplace/google/nginx1:1.20
-quay.io/yugabyte/yugaware -> quay.io/yugabyte/yugaware-itest:2.9.0.0-b4-gcp-mkt
 ```
 

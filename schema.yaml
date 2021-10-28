@@ -5,7 +5,7 @@ x-google-marketplace:
   publishedVersion: "$TAG"
   publishedVersionMetadata:
     releaseNote: >-
-      A first release.
+      Yugabyte release 2.9 builds on our work in the 2.7 series, which fed into the 2.6 stable release. Changelog: https://github.com/yugabyte/yugabyte-db/releases/tag/v2.9.0
 
   images:
     '':
@@ -99,6 +99,14 @@ properties:
           - apiGroups: ['']
             resources: ['secrets']
             verbs: ['create', 'list', 'get', 'delete', 'update', 'patch']
+        - type: ClusterRole
+          rulesType: CUSTOM
+          rules:
+          - apiGroups: ['']
+            resources: ['nodes', 'nodes/proxy']
+            verbs: ['get', 'list', 'watch']
+          - nonResourceURLs: ['/metrics']
+            verbs: ['get']
 
 required:
 - name

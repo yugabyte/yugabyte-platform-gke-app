@@ -8,7 +8,7 @@ business outcomes with the database.
 
 ## About Google Click to Deploy
 
-Popular open stacks on Kubernetes packaged by Google.
+Popular application stacks on Kubernetes packaged by Google.
 
 ## Overview
 
@@ -128,7 +128,7 @@ kubectl create namespace "$NAMESPACE"
 
 #### Create the Service Account
 
-Follow the [link](https://docs.yugabyte.com/latest/yugabyte-platform/configure-yugabyte-platform/set-up-cloud-provider/kubernetes/) to know more.
+Follow the [Configure the Kubernetes cloud provider in Yugabyte Platform](https://docs.yugabyte.com/latest/yugabyte-platform/configure-yugabyte-platform/set-up-cloud-provider/kubernetes/) document to know more.
 
 #### Expand the manifest template
 
@@ -176,14 +176,14 @@ To view your app, open the URL in your browser.
 
 # Backup and Restore
 
-Follow the [link](https://docs.yugabyte.com/latest/yugabyte-platform/administer-yugabyte-platform/back-up-restore-k8s/) to know more about it. 
+Follow the [Back Up and Restore Yugabyte Platform on Kubernetes ](https://docs.yugabyte.com/latest/yugabyte-platform/administer-yugabyte-platform/back-up-restore-k8s/) document to know more. 
 
 # Basic Usage
 
 ## Access the Yugabyte Platform UI
 
 Get the external endpoint from application page in the Google Cloud Console.
-Follow the [link](https://docs.yugabyte.com/latest/yugabyte-platform/configure-yugabyte-platform/) to know more about it.
+Follow the [Configure Yugabyte Platform](https://docs.yugabyte.com/latest/yugabyte-platform/configure-yugabyte-platform/) documentation section to know more about it.
 
 # Uninstalling the Application
 
