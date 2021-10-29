@@ -105,8 +105,9 @@ properties:
           - apiGroups: ['']
             resources: ['nodes', 'nodes/proxy']
             verbs: ['get', 'list', 'watch']
-          - nonResourceURLs: ['/metrics']
-            verbs: ['get']
+# Deployer schema doesn't support nonResourceURLs.
+#          - nonResourceURLs: ['/metrics']
+#            verbs: ['get']
 
 required:
 - name
