@@ -1,0 +1,116 @@
+x-google-marketplace:
+  schemaVersion: v2
+
+  applicationApiVersion: v1beta1
+  publishedVersion: "$TAG"
+  publishedVersionMetadata:
+    releaseNote: >-
+      Yugabyte release 2.9 builds on our work in the 2.7 series, which fed into the 2.6 stable release. Changelog: https://github.com/yugabyte/yugabyte-db/releases/tag/v2.9.0
+
+  images:
+    '':
+      properties:
+        image.repository:
+          type: REPO_WITH_REGISTRY
+        image.tag:
+          type: TAG
+    postgres:
+      properties:
+        image.postgres.registry:
+          type: REGISTRY
+        image.postgres.name:
+          type: REPO_WITHOUT_REGISTRY
+        image.postgres.tag:
+          type: TAG
+    prometheus:
+      properties:
+        image.prometheus.registry:
+          type: REGISTRY
+        image.prometheus.name:
+          type: REPO_WITHOUT_REGISTRY
+        image.prometheus.tag:
+          type: TAG
+    nginx:
+      properties:
+        image.nginx.registry:
+          type: REGISTRY
+        image.nginx.name:
+          type: REPO_WITHOUT_REGISTRY
+        image.nginx.tag:
+          type: TAG
+
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+  yugaware.storage:
+    type: string
+    title: Storage size for persistent volumes
+    default: '5Gi'
+    description: Yugabyte Platform storage size
+    pattern: '^[1-9][0-9]*(\.[0-9]+)?[TGM]i?$'
+  yugaware.serviceAccount:
+    type: string
+    default: yugabyte-platform-sa
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        # https://github.com/yugabyte/charts/blob/master/rbac/platform-global.yaml
+        description: >
+            Service Account for Yugabyte Platform to manage YugabyteDB installations across the cluster.
+        roles:
+        - type: ClusterRole
+          rulesType: CUSTOM
+          rules:
+          - apiGroups: ['']
+            resources: ['namespaces']
+            verbs: ['delete', 'create']
+          - apiGroups: ['']
+            resources: ['pods']
+            verbs: ['get', 'list']
+          - apiGroups: ['']
+            resources: ['services']
+            verbs: ['get', 'list']
+          - apiGroups: ['']
+            resources: ['persistentvolumeclaims']
+            verbs: ['list', 'delete']
+          - apiGroups: ['']
+            resources: ['pods/exec']
+            verbs: ['create']
+          - apiGroups: ['apps']
+            resources: ['statefulsets/scale']
+            verbs: ['patch']
+        - type: ClusterRole
+          rulesType: CUSTOM
+          rules:
+          - apiGroups: ['policy']
+            resources: ['poddisruptionbudgets']
+            verbs: ['get', 'create', 'delete', 'patch']
+          - apiGroups: ['']
+            resources: ['services']
+            verbs: ['get', 'delete', 'create', 'patch']
+          - apiGroups: ['apps']
+            resources: ['statefulsets']
+            verbs: ['get', 'delete', 'create', 'patch']
+          - apiGroups: ['']
+            resources: ['secrets']
+            verbs: ['create', 'list', 'get', 'delete', 'update', 'patch']
+        - type: ClusterRole
+          rulesType: CUSTOM
+          rules:
+          - apiGroups: ['']
+            resources: ['nodes', 'nodes/proxy']
+            verbs: ['get', 'list', 'watch']
+# Deployer schema doesn't support nonResourceURLs.
+#          - nonResourceURLs: ['/metrics']
+#            verbs: ['get']
+
+required:
+- name
+- namespace
+- yugaware.serviceAccount
