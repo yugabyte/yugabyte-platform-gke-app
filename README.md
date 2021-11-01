@@ -197,8 +197,14 @@ Follow the [Configure Yugabyte Platform](https://docs.yugabyte.com/latest/yugaby
 
 ### Delete the Yugabyte Platform App
 
-```
+```shell
 kubectl delete -f ${APP_INSTANCE_NAME} --namespace $NAMESPACE
+```
+
+Remove the orphaned `PersistentVolumeClaim`.
+
+```shell
+kubectl delete pvc -l app.kubernetes.io/name=${APP_INSTANCE_NAME} --namespace $NAMESPACE
 ```
 
 ### Delete the GKE cluster
