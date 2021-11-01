@@ -27,21 +27,21 @@ spec:
 
       ### Getting Started
       Here are a few resources for getting started with Yugabyte platform
-      * [Quick start guide for Yugabyte Platform](https://docs.yugabyte.com/latest/yugabyte-platform/deploy/) - Install Yugabyte platform.
-      * [Quick Start for YugabyteDB](http://docs.yugabyte.com/latest/quick-start/) - install, create a local cluster and read/write from YugaByte DB.  
-      * [Explore core features](https://docs.yugabyte.com/latest/explore/) - automatic sharding & re-balancing, linear scalability, fault tolerance, tunable reads etc.  
-      * [Ecosystem integrations](https://docs.yugabyte.com/latest/develop/ecosystem-integrations/) - integrations with Apache Kafka/KSQL, Apache Spark, JanusGraph, KairosDB, Presto and more.  
-      * [Real world apps](https://docs.yugabyte.com/latest/develop/realworld-apps/) - sample real-world, end-to-end applications built using YugaByte DB.  
+      * [Quick start guide for Yugabyte Platform](https://docs.yugabyte.com/latest/yugabyte-platform/overview/install/) - Install Yugabyte Platform.
+      * [Quick Start for YugabyteDB](http://docs.yugabyte.com/latest/quick-start/) - Install, create a local cluster and read/write from YugabyteDB.  
+      * [Explore core features](https://docs.yugabyte.com/latest/explore/) - Automatic sharding & re-balancing, linear scalability, fault tolerance, tunable reads etc.  
+      * [Integrations](https://docs.yugabyte.com/latest/integrations/) - Integrations with Apache Kafka/KSQL, Apache Spark, JanusGraph, KairosDB, Presto and more.  
+      * [Real world apps](https://docs.yugabyte.com/latest/develop/realworld-apps/) - sample real-world, end-to-end applications built using YugabyteDB.  
 
       ### Help
       Cannot find what you are looking for? Have a question? We love to hear from you - [please file a GitHub issue](https://github.com/YugaByte/yugabyte-db/issues) or talk to us live at [Slack](https://www.yugabyte.com/slack).
     notes: |-
-      # Access Yugabyte Platform UI
+      ### Access Yugabyte Platform UI
 
-      ## Through GKE UI
+      #### Through GKE UI
       Find the IP from Yugabyte Platform GKE App.
 
-      ## Through kubectl
+      #### Through kubectl
       ```
       kubectl get svc -n "${NAMESPACE}" \
         "{{ .Release.Name }}-yugaware-ui"

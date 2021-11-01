@@ -60,8 +60,9 @@ properties:
     x-google-marketplace:
       type: SERVICE_ACCOUNT
       serviceAccount:
+        # https://github.com/yugabyte/charts/blob/master/rbac/platform-global.yaml
         description: >
-            Service Account for YugaByte Platform
+            Service Account for Yugabyte Platform to manage YugabyteDB installations across the cluster.
         roles:
         - type: ClusterRole
           rulesType: CUSTOM
