@@ -5,7 +5,7 @@ x-google-marketplace:
   publishedVersion: "$TAG"
   publishedVersionMetadata:
     releaseNote: >-
-      Yugabyte release 2.9 builds on our work in the 2.7 series, which fed into the 2.6 stable release. Changelog: https://github.com/yugabyte/yugabyte-db/releases/tag/v2.9.0
+      Yugabyte release 2.14 - Changelog: https://docs.yugabyte.com/preview/releases/release-notes/v2.14/#v2.14.4.0
 
   images:
     '':
