@@ -95,4 +95,42 @@ Source - https://github.com/helm/charts/issues/5167#issuecomment-843962731
 {{- else -}}
 {{- randAlphaNum $len -}}
 {{- end -}}
-{{- end }}
+{{- end -}}
+
+{{/*
+Similar to getOrGeneratePassword but written for migration from
+ConfigMap to Secret. Secret is given precedence, and then the upgrade
+case of ConfigMap to Secret is handled.
+TODO: remove this after few releases i.e. once all old platform
+installations are upgraded, and use getOrGeneratePassword.
+*/}}
+{{- define "getOrGeneratePasswordConfigMapToSecret" }}
+{{- $len := (default 8 .Length) | int -}}
+{{- $obj := (lookup "v1" "Secret" .Namespace .Name).data -}}
+{{- if $obj }}
+{{- index $obj .Key -}}
+{{- else -}}
+{{- $obj := (lookup "v1" "ConfigMap" .Namespace .Name).data -}}
+{{- if $obj }}
+{{- index $obj .Key | b64enc -}}
+{{- else -}}
+{{- randAlphaNum $len | b64enc -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Make list of allowed CORS origins
+*/}}
+{{- define "allowedCorsOrigins" -}}
+[
+{{- range .Values.yugaware.additionAllowedCorsOrigins -}}
+{{- . | quote }},
+{{- end -}}
+{{- if .Values.tls.enabled -}}
+"https://{{ .Values.tls.hostname }}"
+{{- else -}}
+"http://{{ .Values.tls.hostname }}"
+{{- end -}}
+]
+{{- end -}}

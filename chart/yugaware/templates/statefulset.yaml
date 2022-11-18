@@ -26,16 +26,15 @@ spec:
       labels:
         app: {{ .Release.Name }}-yugaware
     spec:
-      {{- if .Values.yugaware.serviceAccount }}
-      serviceAccountName: {{ .Values.yugaware.serviceAccount }}
-      {{ else }}
-      serviceAccountName: {{ .Release.Name }}
-      {{- end }}
+      serviceAccountName: {{ .Values.yugaware.serviceAccount | default .Release.Name }}
       imagePullSecrets:
       - name: {{ .Values.image.pullSecret }}
       {{- if .Values.securityContext.enabled }}
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
+        {{- if (semverCompare ">=1.20-x" .Capabilities.KubeVersion.Version) }}
+        fsGroupChangePolicy: {{ .Values.securityContext.fsGroupChangePolicy }}
+        {{- end }}
       {{- end }}
       volumes:
         - name: yugaware-storage
@@ -64,13 +63,26 @@ spec:
             items:
               - key: default.conf
                 path: default.conf
+        - name: nginx-main-config
+          configMap:
+            name: {{ .Release.Name }}-yugaware-nginx-main-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
         - name: prometheus-config
           configMap:
             name: {{ .Release.Name }}-yugaware-prometheus-config
             items:
               - key: prometheus.yml
                 path: prometheus.yml
-
+        {{- if .Values.securityContext.enabled }}
+        - name: init-container-script
+          configMap:
+            name: {{ .Release.Name }}-yugaware-init
+            items:
+              - key: init-permissions.sh
+                path: init-permissions.sh
+        {{- end }}
         {{- if .Values.tls.enabled }}
         - name: {{  .Release.Name }}-yugaware-tls-cert
           secret:
@@ -78,11 +90,20 @@ spec:
         {{- end }}
       initContainers:
         - image: {{ include "full_yugaware_image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: prometheus-configuration
-          command: ["cp", "/default_prometheus_config/prometheus.yml", "/prometheus_configs/prometheus.yml"]
           {{- if .Values.securityContext.enabled }}
+          command:
+            - 'bash'
+            - '-c'
+            - |
+              cp /default_prometheus_config/prometheus.yml /prometheus_configs/prometheus.yml && /bin/bash /init-container/init-permissions.sh;
           securityContext:
             runAsUser: {{ .Values.securityContext.runAsUser }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+          {{- else }}
+          command: ["cp", "/default_prometheus_config/prometheus.yml", "/prometheus_configs/prometheus.yml"]
           {{- end }}
           volumeMounts:
           - name: prometheus-config
@@ -90,24 +111,32 @@ spec:
           - name: yugaware-storage
             mountPath: /prometheus_configs
             subPath: prometheus.yml
+          {{- if .Values.securityContext.enabled }}
+          - name: yugaware-storage
+            mountPath: /opt/yugabyte/yugaware/data/
+            subPath: data
+          - name: init-container-script
+            mountPath: /init-container
+          {{- end }}
       containers:
         {{ if not .Values.postgres.external.host }}
-        - image: {{ include "full_image" (dict "containerName" "postgres" "root" .) }}
-          name: postgres
+        - name: postgres
+          image: {{ include "full_image" (dict "containerName" "postgres" "root" .) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: POSTGRES_USER
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Release.Name }}-yugaware-global-config
                   key: postgres_user
             - name: POSTGRES_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Release.Name }}-yugaware-global-config
                   key: postgres_password
             - name: POSTGRES_DB
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Release.Name }}-yugaware-global-config
                   key: postgres_db
             - name: PGDATA
@@ -115,6 +144,12 @@ spec:
           ports:
             - containerPort: 5432
               name: postgres
+
+         {{- if .Values.postgres.resources }}
+          resources:
+{{ toYaml .Values.postgres.resources | indent 12 }}
+          {{ end }}
+
           volumeMounts:
             - name: yugaware-storage
               mountPath: /var/lib/postgresql/data
@@ -122,27 +157,44 @@ spec:
         {{ end }}
         - name: prometheus
           image: {{ include "full_image" (dict "containerName" "prometheus" "root" .) }}
-          {{- if (not .Values.ocpCompatibility.enabled) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.securityContext.enabled }}
+          securityContext:
+            runAsUser: {{ .Values.securityContext.runAsUser }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+          {{- else if (not .Values.ocpCompatibility.enabled) }}
           securityContext:
             runAsUser: 0
           {{- end }}
+
+          {{- if .Values.prometheus.resources }}
+          resources:
+{{ toYaml .Values.prometheus.resources | indent 12 }}
+          {{ end }}
+
           volumeMounts:
           - name: yugaware-storage
             mountPath: /prometheus_configs
             subPath: prometheus.yml
           - name: yugaware-storage
             mountPath: /prometheus/
+          {{- if .Values.prometheus.scrapeNodes }}
           - name: yugaware-storage
             mountPath: /opt/yugabyte/prometheus/targets
             subPath: swamper_targets
+          {{- end }}
+          {{- if .Values.prometheus.evaluateAlertRules }}
           - name: yugaware-storage
             mountPath: /opt/yugabyte/prometheus/rules
             subPath: swamper_rules
+          {{- end }}
           args:
             - --config.file=/prometheus_configs/prometheus.yml
             - --storage.tsdb.path=/prometheus/
             - --web.enable-admin-api
             - --web.enable-lifecycle
+            - --storage.tsdb.retention.time={{ .Values.prometheus.retentionTime }}
           ports:
             - containerPort: 9090
         - name: yugaware
@@ -150,34 +202,39 @@ spec:
           {{- if .Values.securityContext.enabled }}
           securityContext:
             runAsUser: {{ .Values.securityContext.runAsUser }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           {{- if .Values.yugaware.resources }}
           resources:
 {{ toYaml .Values.yugaware.resources | indent 12 }}
           {{- end }}
-          command: [ "/bin/bash", "-c"]
+
+          command: [ "/sbin/tini", "--"]
           args:
-            - "bin/yugaware -Dconfig.file=/data/application.docker.conf"
+            - "bin/yugaware"
+            - "-Dconfig.file=/data/application.docker.conf"
           env:
             - name: POSTGRES_USER
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Release.Name }}-yugaware-global-config
                   key: postgres_user
             - name: POSTGRES_PASSWORD
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Release.Name }}-yugaware-global-config
                   key: postgres_password
             - name: POSTGRES_DB
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Release.Name }}-yugaware-global-config
                   key: postgres_db
             - name: APP_SECRET
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: {{ .Release.Name }}-yugaware-global-config
                   key: app_secret
           ports:
@@ -211,11 +268,21 @@ spec:
             subPath: prometheus.yml
         - name: nginx
           image: {{ include "full_image" (dict "containerName" "nginx" "root" .) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: 8080
+
+          {{- if .Values.nginx.resources }}
+          resources:
+{{ toYaml .Values.nginx.resources | indent 12 }}
+          {{- end }}
+
           volumeMounts:
           - mountPath: /etc/nginx/conf.d/
             name: nginx-config
+          - mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            name: nginx-main-config
           {{- if .Values.tls.enabled }}
           - name: {{  .Release.Name }}-yugaware-tls-cert
             mountPath: /opt/certs/
