@@ -81,7 +81,10 @@ docker tag <IMAGE> $REGISTRY/$APP_NAME/nginx:${TAG%.*}
 docker tag <IMAGE> $REGISTRY/$APP_NAME/nginx:${TAG}
 ```
 
-## Environment setup to test the changes
+## Test
+### Environment setup
+
+- Follow for [Prerequisites](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/tool-prerequisites.md).
 
 - We need GKE cluster in the same google project `yugabyte-mp-public` to test the app related changes.
 
@@ -91,6 +94,10 @@ docker tag <IMAGE> $REGISTRY/$APP_NAME/nginx:${TAG}
   gcloud config set project yugabyte-mp-public
   ```
 - Deploy a GKE cluster.
+
+  ```bash
+  gcloud beta container --project "yugabyte-mp-public" clusters create "gke-test" --zone "us-central1-c" --no-enable-basic-auth --cluster-version "1.25.6-gke.200" --release-channel "regular" --machine-type "e2-standard-8" --image-type "COS_CONTAINERD" --disk-type "pd-balanced" --disk-size "50" --metadata disable-legacy-endpoints=true --max-pods-per-node "110" --num-nodes "1" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "projects/yugabyte-mp-public/global/networks/default" --subnetwork "projects/yugabyte-mp-public/regions/us-central1/subnetworks/default" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --no-enable-master-authorized-networks --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --enable-shielded-nodes --node-locations "us-central1-c"
+  ```
 
 - Use the following command to get the credentials of running GKE test cluster.
 
@@ -117,6 +124,8 @@ docker tag <IMAGE> $REGISTRY/$APP_NAME/nginx:${TAG}
   | sed "s/namespace: <SA_NAMESPACE>/namespace: ${YBA_NAMESPACE}"/g \
   | kubectl apply -n ${YBA_NAMESPACE} -f -
   ```
+
+### Install
 
 - Install the GKE app in the test cluster.
 
