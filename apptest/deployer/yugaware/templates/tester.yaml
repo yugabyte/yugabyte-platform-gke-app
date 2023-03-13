@@ -44,6 +44,7 @@ data:
     set -x
     ui="http://${APP_SERVICE}"
     echo GET $ui
+    sleep 30
     http_status_code=$(curl -o /dev/null -s -w "%{http_code}\n" $ui)
     echo "Expected http status code: 200"
     echo "Actual http status code: $http_status_code"

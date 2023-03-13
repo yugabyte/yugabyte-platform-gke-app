@@ -46,7 +46,10 @@ yugaware:
   storageClass: ""
   storageAnnotations: {}
   multiTenant: false
-  serviceAccount: yugaware
+  # Name of existing ServiceAccount. When provided, the chart won't create a ServiceAccount.
+  # It will attach the required RBAC roles to it.
+  # Helpful in Yugabyte Platform GKE App.
+  serviceAccount: ''
   serviceMonitor:
     enabled: false
     annotations: {}
@@ -158,7 +161,7 @@ rbac:
   ## ClusterRole and Binding, for example an OpenShift cluster. When
   ## set to false, some of the graphs from Container section of the
   ## Metrics UI don't work.
-  create: true
+  create: false
 
 ## In order to deploy on OpenShift Container Platform, set this to
 ## true.
@@ -235,4 +238,4 @@ additionalAppConf:
 ## APIVersion based on the target Kubernetes cluster. You don't need
 ## to modify this unless you are using helm template command i.e. GKE
 ## app's deployer image against a Kubernetes cluster >= 1.21.
-# pdbPolicyVersionOverride: "v1beta1"
+pdbPolicyVersionOverride: "v1"
